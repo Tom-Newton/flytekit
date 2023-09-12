@@ -100,7 +100,7 @@ class FileAccessProvider(object):
         self._local = fsspec.filesystem(None)
 
         self._data_config = data_config if data_config else DataConfig.auto()
-        self._default_remote = cast(fsspec.AbstractFileSystem, self.get_filesystem(raw_output_prefix))
+        self._default_remote = self.get_filesystem_for_path(raw_output_prefix)
         if os.name == "nt" and raw_output_prefix.startswith("file://"):
             raise FlyteAssertion("Cannot use the file:// prefix on Windows.")
         self._raw_output_prefix = (
@@ -117,8 +117,8 @@ class FileAccessProvider(object):
     def data_config(self) -> DataConfig:
         return self._data_config
 
-    def get_filesystem(
-        self, path: typing.Optional[str] = None, anonymous: bool = False, **kwargs
+    def get_filesystem_for_path(
+        self, path: str = "", anonymous: bool = False, **kwargs
     ) -> fsspec.AbstractFileSystem:
         if not path:
             return self._default_remote
@@ -126,11 +126,6 @@ class FileAccessProvider(object):
         storage_options = get_storage_options_for_filesystem(protocol=get_protocol(path), anonymous=anonymous, data_config=self._data_config, **kwargs)
 
         return url_to_fs(path, **storage_options)[0]
-        
-
-    def get_filesystem_for_path(self, path: str = "", anonymous: bool = False, **kwargs) -> fsspec.AbstractFileSystem:
-        protocol = get_protocol(path)
-        return self.get_filesystem(protocol, anonymous=anonymous, **kwargs)
 
     @staticmethod
     def is_remote(path: Union[str, os.PathLike]) -> bool:
@@ -179,7 +174,7 @@ class FileAccessProvider(object):
             return file_system.exists(path)
         except OSError as oe:
             logger.debug(f"Error in exists checking {path} {oe}")
-            anon_fs = self.get_filesystem(get_protocol(path), anonymous=True)
+            anon_fs = self.get_filesystem_for_path(path, anonymous=True)
             if anon_fs is not None:
                 logger.debug(f"Attempting anonymous exists with {anon_fs}")
                 return anon_fs.exists(path)
@@ -199,7 +194,7 @@ class FileAccessProvider(object):
             return file_system.get(from_path, to_path, recursive=recursive, **kwargs)
         except OSError as oe:
             logger.debug(f"Error in getting {from_path} to {to_path} rec {recursive} {oe}")
-            file_system = self.get_filesystem(get_protocol(from_path), anonymous=True)
+            file_system = self.get_filesystem_for_path(from_path, anonymous=True)
             if file_system is not None:
                 logger.debug(f"Attempting anonymous get with {file_system}")
                 return file_system.get(from_path, to_path, recursive=recursive, **kwargs)
