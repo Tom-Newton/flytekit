@@ -119,13 +119,13 @@ class FileAccessProvider(object):
 
     def get_filesystem(
         self, path: typing.Optional[str] = None, anonymous: bool = False, **kwargs
-    ) -> typing.Optional[fsspec.AbstractFileSystem]:
+    ) -> fsspec.AbstractFileSystem:
         if not path:
             return self._default_remote
         
         storage_options = get_storage_options_for_filesystem(protocol=get_protocol(path), anonymous=anonymous, data_config=self._data_config, **kwargs)
 
-        return url_to_fs(path, **storage_options)
+        return url_to_fs(path, **storage_options)[0]
         
 
     def get_filesystem_for_path(self, path: str = "", anonymous: bool = False, **kwargs) -> fsspec.AbstractFileSystem:
