@@ -153,6 +153,7 @@ class FileAccessProvider(object):
         return fsspec.filesystem(protocol, **storage_options)
 
         return fsspec.filesystem(protocol, **storage_options)
+
     def get_filesystem_for_path(self, path: str = "", anonymous: bool = False, **kwargs) -> fsspec.AbstractFileSystem:
         protocol = get_protocol(path)
         return self.get_filesystem(protocol, anonymous=anonymous, **kwargs)
