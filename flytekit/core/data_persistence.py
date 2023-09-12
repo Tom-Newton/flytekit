@@ -26,6 +26,7 @@ from uuid import UUID
 
 import fsspec
 from fsspec.utils import get_protocol
+from fsspec.core import url_to_fs
 
 from flytekit import configuration
 from flytekit.configuration import DataConfig
@@ -61,6 +62,19 @@ def s3_setup_args(s3_cfg: configuration.S3Config, anonymous: bool = False):
     return kwargs
 
 
+def get_storage_options_for_filesystem(protocol: str, data_config: typing.Optional[DataConfig] = None, anonymous: bool = False, **kwargs) -> typing.Dict[str, Any]:
+    if protocol == "file":
+        return {"auto_mkdir": True, **kwargs}
+    if protocol == "s3":
+        return {**s3_setup_args(data_config.s3, anonymous=anonymous), **kwargs}
+    if protocol == "gs":
+        if anonymous:
+            kwargs["token"] = _ANON
+        return kwargs
+    if protocol == "abfs":
+        return {"anon": False, **kwargs}
+
+
 class FileAccessProvider(object):
     """
     This is the class that is available through the FlyteContext and can be used for persisting data to the remote
@@ -86,8 +100,7 @@ class FileAccessProvider(object):
         self._local = fsspec.filesystem(None)
 
         self._data_config = data_config if data_config else DataConfig.auto()
-        self._default_protocol = get_protocol(raw_output_prefix)
-        self._default_remote = cast(fsspec.AbstractFileSystem, self.get_filesystem(self._default_protocol))
+        self._default_remote = cast(fsspec.AbstractFileSystem, self.get_filesystem(raw_output_prefix))
         if os.name == "nt" and raw_output_prefix.startswith("file://"):
             raise FlyteAssertion("Cannot use the file:// prefix on Windows.")
         self._raw_output_prefix = (
@@ -105,29 +118,15 @@ class FileAccessProvider(object):
         return self._data_config
 
     def get_filesystem(
-        self, protocol: typing.Optional[str] = None, anonymous: bool = False, **kwargs
+        self, path: typing.Optional[str] = None, anonymous: bool = False, **kwargs
     ) -> typing.Optional[fsspec.AbstractFileSystem]:
-        if not protocol:
+        if not path:
             return self._default_remote
-        if protocol == "file":
-            kwargs["auto_mkdir"] = True
-        elif protocol == "s3":
-            s3kwargs = s3_setup_args(self._data_config.s3, anonymous=anonymous)
-            s3kwargs.update(kwargs)
-            return fsspec.filesystem(protocol, **s3kwargs)  # type: ignore
-        elif protocol == "gs":
-            if anonymous:
-                kwargs["token"] = _ANON
-            return fsspec.filesystem(protocol, **kwargs)  # type: ignore
-        elif protocol == "abfs":
-            kwargs["anon"] = False
-            return fsspec.filesystem(protocol, **kwargs)  # type: ignore
+        
+        storage_options = get_storage_options_for_filesystem(protocol=get_protocol(path), anonymous=anonymous, data_config=self._data_config, **kwargs)
 
-        # Preserve old behavior of returning None for file systems that don't have an explicit anonymous option.
-        if anonymous:
-            return None
-
-        return fsspec.filesystem(protocol, **kwargs)  # type: ignore
+        return url_to_fs(path, **storage_options)
+        
 
     def get_filesystem_for_path(self, path: str = "", anonymous: bool = False, **kwargs) -> fsspec.AbstractFileSystem:
         protocol = get_protocol(path)
