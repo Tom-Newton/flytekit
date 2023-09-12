@@ -25,6 +25,7 @@ from typing import Any, Dict, Union, cast
 from uuid import UUID
 
 import fsspec
+from fsspec.core import url_to_fs
 from fsspec.utils import get_protocol
 
 from flytekit import configuration
@@ -151,6 +152,7 @@ class FileAccessProvider(object):
 
         return fsspec.filesystem(protocol, **storage_options)
 
+        return fsspec.filesystem(protocol, **storage_options)
     def get_filesystem_for_path(self, path: str = "", anonymous: bool = False, **kwargs) -> fsspec.AbstractFileSystem:
         protocol = get_protocol(path)
         return self.get_filesystem(protocol, anonymous=anonymous, **kwargs)
