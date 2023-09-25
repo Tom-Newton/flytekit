@@ -272,6 +272,21 @@ def test_get_fsspec_storage_options_azure(mock_os, mock_get_config_file):
         "anon": False,
     }
 
+@mock.patch("flytekit.configuration.get_config_file")
+@mock.patch.dict(os.environ, {
+        "FLYTE_AZURE_ACCOUNT_NAME": "accountname",
+        "FLYTE_AZURE_ACCOUNT_KEY": "accountkey",
+    })
+def test_get_fsspec_storage_options_azure_with_overrides(mock_get_config_file):
+    mock_get_config_file.return_value = None
+    storage_options = get_fsspec_storage_options("abfs", DataConfig.auto(), anonymous=True, account_name="other_accountname", other_argument="value")
+    assert storage_options == {
+        "account_name": "other_accountname",
+        "account_key": "accountkey",
+        "anon": True,
+        "other_argument": "value",
+    }
+
 
 @mock.patch("flytekit.configuration.get_config_file")
 @mock.patch("os.environ")
