@@ -561,10 +561,10 @@ def _internal_remote(
     client_secret_key: str,
 ) -> FlyteRemote:
     """Derives a FlyteRemote object from a yaml configuration file, modifying parts to make it work internally."""
-    assert client_secret_group is not None, "secret_group must be defined when using a remote cluster"
-    assert client_secret_key is not None, "secret_key must be defined a remote cluster"
-    secrets_manager = current_context().secrets
-    client_secret = secrets_manager.get(client_secret_group, client_secret_key)
+    # assert client_secret_group is not None, "secret_group must be defined when using a remote cluster"
+    # assert client_secret_key is not None, "secret_key must be defined a remote cluster"
+    # secrets_manager = current_context().secrets
+    # client_secret = secrets_manager.get(client_secret_group, client_secret_key)
     # get the raw output prefix from the context that's set from the pyflyte-execute entrypoint
     # (see flytekit/bin/entrypoint.py)
     ctx = FlyteContextManager.current_context()
@@ -573,12 +573,10 @@ def _internal_remote(
             platform=PlatformConfig(
                 endpoint=remote.config.platform.endpoint,
                 insecure=remote.config.platform.insecure,
-                auth_mode="client_credentials",
-                client_id=remote.config.platform.client_id,
-                client_credentials_secret=remote.config.platform.client_credentials_secret or client_secret,
             ),
+            data_config=DataConfig.auto(),
         ),
         default_domain=remote.default_domain,
         default_project=remote.default_project,
-        data_upload_location=ctx.file_access.raw_output_prefix,
+        data_upload_location="abfs://flyte/",
     )
