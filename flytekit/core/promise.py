@@ -5,7 +5,7 @@ import inspect
 from enum import Enum
 from typing import Any, Coroutine, Dict, List, Optional, Set, Tuple, Union, cast
 
-from typing_extensions import Protocol, get_args
+from typing_extensions import Protocol, get_args, runtime_checkable
 
 from flytekit.core import constants as _common_constants
 from flytekit.core import context_manager as _flyte_context
@@ -1071,6 +1071,7 @@ def flyte_entity_call_handler(
             f"Python interface: {cast(SupportsNodeCreation, entity).python_interface}"
         )
 
-class DeferredPromise:
-    def __call__(self, **inputs) -> Callable[[], Promise]:
+@runtime_checkable
+class CreatesPromise(Protocol):
+    def __call__(self, **kwargs) -> Promise:
         ...

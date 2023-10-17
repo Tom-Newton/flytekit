@@ -6,7 +6,7 @@ from flytekit.core.base_task import PythonTask
 from flytekit.core.context_manager import BranchEvalMode, FlyteContext
 from flytekit.core.launch_plan import LaunchPlan
 from flytekit.core.node import Node
-from flytekit.core.promise import Promise, VoidPromise, DeferredPromise
+from flytekit.core.promise import Promise, VoidPromise, CreatesPromise
 from flytekit.core.workflow import WorkflowBase
 from flytekit.exceptions import user as _user_exceptions
 from flytekit.loggers import logger
@@ -68,7 +68,7 @@ def create_node(
         and not isinstance(entity, WorkflowBase)
         and not isinstance(entity, LaunchPlan)
         and not isinstance(entity, RemoteEntity)
-        and not isinstance(entity, DeferredPromise)
+        and not isinstance(entity, CreatesPromise)
     ):
         raise AssertionError(f"Should be a callable Flyte entity (either local or fetched) but is {type(entity)}")
 
@@ -97,7 +97,7 @@ def create_node(
         if isinstance(outputs, VoidPromise):
             return node
 
-        if isinstance(entity, DeferredPromise):
+        if isinstance(entity, CreatesPromise):
             node.outputs.update(outputs._asdict())
             return node
 
