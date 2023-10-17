@@ -1070,3 +1070,7 @@ def flyte_entity_call_handler(
             f"Result {result}. "
             f"Python interface: {cast(SupportsNodeCreation, entity).python_interface}"
         )
+
+class DeferredPromise:
+    def __call__(self, **inputs) -> Callable[[], Promise]:
+        ...
