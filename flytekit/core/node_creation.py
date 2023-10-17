@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Dict, Tuple, Union
 
 from flytekit.core.base_task import PythonTask
 from flytekit.core.context_manager import BranchEvalMode, FlyteContext
 from flytekit.core.launch_plan import LaunchPlan
 from flytekit.core.node import Node
-from flytekit.core.promise import VoidPromise
+from flytekit.core.promise import Promise, VoidPromise
 from flytekit.core.workflow import WorkflowBase
 from flytekit.exceptions import user as _user_exceptions
 from flytekit.loggers import logger
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def create_node(
-    entity: Union[PythonTask, LaunchPlan, WorkflowBase, RemoteEntity], *args, **kwargs
+    entity: Union[PythonTask, LaunchPlan, WorkflowBase, RemoteEntity, Promise], *args, **kwargs
 ) -> Union[Node, VoidPromise]:
     """
     This is the function you want to call if you need to specify dependencies between tasks that don't consume and/or
@@ -63,13 +63,14 @@ def create_node(
             f"Aborting execution as detected {len(args)} positional args {args}"
         )
 
-    # if (
-    #     not isinstance(entity, PythonTask)
-    #     and not isinstance(entity, WorkflowBase)
-    #     and not isinstance(entity, LaunchPlan)
-    #     and not isinstance(entity, RemoteEntity)
-    # ):
-    #     raise AssertionError(f"Should be a callable Flyte entity (either local or fetched) but is {type(entity)}")
+    if (
+        not isinstance(entity, PythonTask)
+        and not isinstance(entity, WorkflowBase)
+        and not isinstance(entity, LaunchPlan)
+        and not isinstance(entity, RemoteEntity)
+        and not isinstance(entity, Promise)
+    ):
+        raise AssertionError(f"Should be a callable Flyte entity (either local or fetched) but is {type(entity)}")
 
     # This function is only called from inside workflows and dynamic tasks.
     # That means there are two scenarios we need to take care of, compilation and local workflow execution.
@@ -96,13 +97,12 @@ def create_node(
         if isinstance(outputs, VoidPromise):
             return node
 
-        if (
-            not isinstance(entity, PythonTask)
-            and not isinstance(entity, WorkflowBase)
-            and not isinstance(entity, LaunchPlan)
-            and not isinstance(entity, RemoteEntity)
-        ):
-            node.outputs["o0"] = outputs
+        if isinstance(entity, Promise):
+            
+            if not isinstance(outputs, tuple):
+                outputs = tuple(outputs)
+            for output in outputs:
+                node.outputs[output.var] = output
             return outputs
 
         # If a Promise or custom namedtuple of Promises, we need to attach each output as an attribute to the node.
