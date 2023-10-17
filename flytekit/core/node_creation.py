@@ -63,13 +63,13 @@ def create_node(
             f"Aborting execution as detected {len(args)} positional args {args}"
         )
 
-    if (
-        not isinstance(entity, PythonTask)
-        and not isinstance(entity, WorkflowBase)
-        and not isinstance(entity, LaunchPlan)
-        and not isinstance(entity, RemoteEntity)
-    ):
-        raise AssertionError(f"Should be a callable Flyte entity (either local or fetched) but is {type(entity)}")
+    # if (
+    #     not isinstance(entity, PythonTask)
+    #     and not isinstance(entity, WorkflowBase)
+    #     and not isinstance(entity, LaunchPlan)
+    #     and not isinstance(entity, RemoteEntity)
+    # ):
+    #     raise AssertionError(f"Should be a callable Flyte entity (either local or fetched) but is {type(entity)}")
 
     # This function is only called from inside workflows and dynamic tasks.
     # That means there are two scenarios we need to take care of, compilation and local workflow execution.
@@ -95,6 +95,15 @@ def create_node(
         # If a VoidPromise, just return the node.
         if isinstance(outputs, VoidPromise):
             return node
+
+        if (
+            not isinstance(entity, PythonTask)
+            and not isinstance(entity, WorkflowBase)
+            and not isinstance(entity, LaunchPlan)
+            and not isinstance(entity, RemoteEntity)
+        ):
+            node.outputs["o0"] = outputs
+            return outputs
 
         # If a Promise or custom namedtuple of Promises, we need to attach each output as an attribute to the node.
         # todo: fix the noqas below somehow... can't add abstract property to RemoteEntity because it has to come
