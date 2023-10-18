@@ -98,7 +98,10 @@ def create_node(
             return node
 
         if isinstance(entity, CreatesPromise):
-            node.outputs.update(outputs._asdict())
+            if hasattr(outputs, "_asdict"):
+                node.outputs.update(outputs._asdict())
+            else:
+                node.outputs[outputs.var] = outputs
             return node
 
         # If a Promise or custom namedtuple of Promises, we need to attach each output as an attribute to the node.
