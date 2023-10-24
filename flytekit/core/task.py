@@ -4,10 +4,12 @@ from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, ov
 
 from flytekit.core.base_task import TaskMetadata, TaskResolverMixin
 from flytekit.core.interface import transform_function_to_interface
+from flytekit.core.launch_plan import LaunchPlan
 from flytekit.core.pod_template import PodTemplate
 from flytekit.core.python_function_task import PythonFunctionTask
 from flytekit.core.reference_entity import ReferenceEntity, TaskReference
 from flytekit.core.resources import Resources
+from flytekit.core.workflow import WorkflowBase
 from flytekit.image_spec.image_spec import ImageSpec
 from flytekit.models.documentation import Documentation
 from flytekit.models.security import Secret
@@ -96,6 +98,7 @@ def task(
     limits: Optional[Resources] = ...,
     secret_requests: Optional[List[Secret]] = ...,
     execution_mode: PythonFunctionTask.ExecutionBehavior = ...,
+    output_entity_hint: Union[PythonFunctionTask, LaunchPlan, WorkflowBase] = ...,
     task_resolver: Optional[TaskResolverMixin] = ...,
     docs: Optional[Documentation] = ...,
     disable_deck: bool = ...,
@@ -122,6 +125,7 @@ def task(
     limits: Optional[Resources] = ...,
     secret_requests: Optional[List[Secret]] = ...,
     execution_mode: PythonFunctionTask.ExecutionBehavior = ...,
+    output_entity_hint: Union[PythonFunctionTask, LaunchPlan, WorkflowBase] = ...,
     task_resolver: Optional[TaskResolverMixin] = ...,
     docs: Optional[Documentation] = ...,
     disable_deck: bool = ...,
@@ -147,7 +151,7 @@ def task(
     limits: Optional[Resources] = None,
     secret_requests: Optional[List[Secret]] = None,
     execution_mode: PythonFunctionTask.ExecutionBehavior = PythonFunctionTask.ExecutionBehavior.DEFAULT,
-    output_entity_hint = None,
+    output_entity_hint: Union[PythonFunctionTask, LaunchPlan, WorkflowBase] = None,
     task_resolver: Optional[TaskResolverMixin] = None,
     docs: Optional[Documentation] = None,
     disable_deck: bool = True,
