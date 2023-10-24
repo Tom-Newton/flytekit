@@ -9,6 +9,7 @@ from functools import update_wrapper
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, Type, Union, cast, overload
 
 from flytekit.core import constants as _common_constants
+from flytekit.core import launch_plan as _annotated_launch_plan
 from flytekit.core.base_task import PythonTask
 from flytekit.core.class_based_resolver import ClassStorageTaskResolver
 from flytekit.core.condition import ConditionalSection
@@ -26,7 +27,6 @@ from flytekit.core.interface import (
     transform_inputs_to_parameters,
     transform_interface_to_typed_interface,
 )
-from flytekit.core.launch_plan import LaunchPlan
 from flytekit.core.node import Node
 from flytekit.core.promise import (
     NodeOutput,
@@ -506,7 +506,7 @@ class ImperativeWorkflow(WorkflowBase):
             return get_promise(self.output_bindings[0].binding, intermediate_node_outputs)
         return tuple([get_promise(b.binding, intermediate_node_outputs) for b in self.output_bindings])
 
-    def add_entity(self, entity: Union[PythonTask, LaunchPlan, WorkflowBase], **kwargs) -> Node:
+    def add_entity(self, entity: Union[PythonTask, _annotated_launch_plan.LaunchPlan, WorkflowBase], **kwargs) -> Node:
         """
         Anytime you add an entity, all the inputs to the entity must be bound.
         """
@@ -589,7 +589,7 @@ class ImperativeWorkflow(WorkflowBase):
     def add_task(self, task: PythonTask, **kwargs) -> Node:
         return self.add_entity(task, **kwargs)
 
-    def add_launch_plan(self, launch_plan: LaunchPlan, **kwargs) -> Node:
+    def add_launch_plan(self, launch_plan: _annotated_launch_plan.LaunchPlan, **kwargs) -> Node:
         return self.add_entity(launch_plan, **kwargs)
 
     def add_subwf(self, sub_wf: WorkflowBase, **kwargs) -> Node:
