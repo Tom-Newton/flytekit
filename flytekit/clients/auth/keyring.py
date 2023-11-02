@@ -3,7 +3,7 @@ import typing
 from dataclasses import dataclass
 
 import keyring as _keyring
-from keyring.errors import NoKeyringError
+from keyring.errors import NoKeyringError, KeyringError
 
 
 @dataclass
@@ -48,7 +48,7 @@ class KeyringStore:
         try:
             refresh_token = _keyring.get_password(for_endpoint, KeyringStore._refresh_token_key)
             access_token = _keyring.get_password(for_endpoint, KeyringStore._access_token_key)
-        except NoKeyringError as e:
+        except KeyringError as e:
             logging.debug(f"KeyRing not available, tokens will not be cached. Error: {e}")
             return None
 
