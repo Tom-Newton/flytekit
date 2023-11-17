@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as _datetime
 from functools import update_wrapper
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, overload
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type, TypeVar, Union, overload
 
 from flytekit.core import launch_plan as _annotated_launchplan
 from flytekit.core import workflow as _annotated_workflow
@@ -100,8 +100,8 @@ def task(
     limits: Optional[Resources] = ...,
     secret_requests: Optional[List[Secret]] = ...,
     execution_mode: PythonFunctionTask.ExecutionBehavior = ...,
-    output_entity_hint: Optional[
-        Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]
+    output_entity_hints: Optional[
+        Iterable[Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]]
     ] = ...,
     task_resolver: Optional[TaskResolverMixin] = ...,
     docs: Optional[Documentation] = ...,
@@ -129,8 +129,8 @@ def task(
     limits: Optional[Resources] = ...,
     secret_requests: Optional[List[Secret]] = ...,
     execution_mode: PythonFunctionTask.ExecutionBehavior = ...,
-    output_entity_hint: Optional[
-        Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]
+    output_entity_hints: Optional[
+        Iterable[Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]]
     ] = ...,
     task_resolver: Optional[TaskResolverMixin] = ...,
     docs: Optional[Documentation] = ...,
@@ -157,8 +157,8 @@ def task(
     limits: Optional[Resources] = None,
     secret_requests: Optional[List[Secret]] = None,
     execution_mode: PythonFunctionTask.ExecutionBehavior = PythonFunctionTask.ExecutionBehavior.DEFAULT,
-    output_entity_hint: Optional[
-        Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]
+    output_entity_hints: Optional[
+        Iterable[Union[PythonFunctionTask, _annotated_launchplan.LaunchPlan, _annotated_workflow.WorkflowBase]]
     ] = None,
     task_resolver: Optional[TaskResolverMixin] = None,
     docs: Optional[Documentation] = None,
@@ -280,7 +280,7 @@ def task(
             limits=limits,
             secret_requests=secret_requests,
             execution_mode=execution_mode,
-            output_entity_hint=output_entity_hint,
+            output_entity_hints=output_entity_hints,
             task_resolver=task_resolver,
             disable_deck=disable_deck,
             docs=docs,
