@@ -178,7 +178,8 @@ class FlyteFS(HTTPFileSystem):
         rpath = rpath.replace(REMOTE_PLACEHOLDER, "", 1)
         resp, content_length, md5_bytes = self.get_upload_link(lpath, rpath, p, hashes)
 
-        headers = {"Content-Length": str(content_length), "Content-MD5": b64encode(md5_bytes).decode("utf-8")}
+        headers = {"Content-Length": str(content_length), "Content-MD5": b64encode(md5_bytes).decode("utf-8"), "x-ms-blob-type": "BlockBlob"}
+        headers = _add_extra_headers(resp.signed_url, headers)
         kwargs["headers"] = headers
         rpath = resp.signed_url
         FlytePathResolver.add_mapping(rpath, resp.native_url)
@@ -310,3 +311,9 @@ class FlyteFS(HTTPFileSystem):
     def __str__(self):
         p = super().__str__()
         return f"FlyteFS({self._remote}): {p}"
+
+
+def _add_extra_headers(signed_url: str,  headers: typing.Dict[str, str]):
+    if "core.windows.net" in signed_url:
+        return {**headers, "x-ms-blob-type": "BlockBlob"}
+    return headers
