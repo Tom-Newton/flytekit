@@ -175,7 +175,7 @@ class FlyteFS(HTTPFileSystem):
         p = kwargs.pop(_PREFIX_KEY)
         hashes = kwargs.pop(_HASHES_KEY)
         # Parse rpath, strip out everything that doesn't make sense.
-        rpath = rpath.replace(f"{REMOTE_PLACEHOLDER}/", "", 1)
+        rpath = rpath.replace(REMOTE_PLACEHOLDER, "", 1)
         resp, content_length, md5_bytes = self.get_upload_link(lpath, rpath, p, hashes)
 
         headers = {"Content-Length": str(content_length), "Content-MD5": b64encode(md5_bytes).decode("utf-8")}
