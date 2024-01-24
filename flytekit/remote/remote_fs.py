@@ -178,7 +178,7 @@ class FlyteFS(HTTPFileSystem):
         rpath = rpath.replace(REMOTE_PLACEHOLDER, "", 1)
         resp, content_length, md5_bytes = self.get_upload_link(lpath, rpath, p, hashes)
 
-        headers = {"Content-Length": str(content_length), "Content-MD5": b64encode(md5_bytes).decode("utf-8"), "x-ms-blob-type": "BlockBlob"}
+        headers = {"Content-Length": str(content_length), "Content-MD5": b64encode(md5_bytes).decode("utf-8")}
         headers = _add_extra_headers(resp.signed_url, headers)
         kwargs["headers"] = headers
         rpath = resp.signed_url
